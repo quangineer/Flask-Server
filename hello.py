@@ -2,7 +2,9 @@ from flask import Flask
 from flask import render_template
 from flask import send_from_directory
 from random import randint
-app = Flask(__name__, static_url_path='/static')
+app = Flask(
+    __name__, 
+    static_url_path='/static')
 
 # url_for('static', filename='style.css')
 
