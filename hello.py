@@ -11,7 +11,7 @@ app = Flask(
 @app.route("/")
 def index():
     return render_template('index.html')
-
+    
 # Other static resources
 @app.route('/js/<path:path>')
 def send_js(path):
@@ -25,8 +25,15 @@ def send_css(path):
 @app.route('/img/<path:path>')
 def send_img(path):
     return send_from_directory('static/img', path)
-
+@app.route('/contact.html')
+def contact():
+    return render_template('contact.html')
 # Blog post resources
 @app.route("/post/<postname>/")
 def post1(postname):
     return render_template(postname)
+
+# About page
+@app.route("/about.html")
+def about():
+    return render_template('about.html')

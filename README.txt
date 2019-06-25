@@ -1,5 +1,6 @@
 
 Run app:
 ```
-FLASK_APP=hello.py flask run
+export FLASK_APP=hello.py
+python3 -m flask run
 ```
