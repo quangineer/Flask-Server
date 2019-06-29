@@ -1,0 +1,122 @@
+{% include 'header.html' %}
+
+ <body>	
+
+
+     <!-- Page Header -->	
+    <!-- Set your background image for this header on the line below. -->	
+    <header class="intro-header" style="background-image: url('')">	
+        <div class="container">	
+            <div class="row">	
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                    <div class="post-heading">	
+                        <h1>Fuel Economy Data</h1>	
+                        <h3 class="subheading">Analyze a dataset of Fuel Economy Data using Python with pandas and matplotlib</h3>	
+                        <span class="meta">Posted by <a href="/">Quangineer</a> on June 27, 2019</span>	
+                    </div>	
+                </div>	
+            </div>	
+        </div>	
+    </header>	
+
+     <!-- Post Content -->	
+    <article>	
+        <div class="container">	
+            <div class="row">	
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                    <h3 class="section-heading">About the Data </h3>	
+                    <p>Fuel Economy Data contains various data and insightful results of vehical testings done by various agencies and manufactures. It can be accessed through <a style="text-decoration:underline" href="https://www.fueleconomy.gov/feg/download.shtml">here</a>.</p>	
+
+                    <p>I compare the Fuel Economy Data of the year 2008 and 2018. Below are my findings.</p>
+
+                    <h3 class="section-heading">Cleaning the data</h3>	
+                    <p>Here is a snipet of the process of cleaning this data to be able to processed by pandas and matplotlib.</p>
+                    <pre><code>
+# There is a problem associated with a cell in this Series. Some cells have two values because a vehicle can operate on more than one type of fuel, thus some cells hold two values separated by '/'.
+# We attempt to unwrangle and separate this data into another column.
+
+import pandas as pd
+df_08 = pd.read_csv('data_08_v3.csv')
+
+# Pull out all the cell that has the value containing 
+hb_08 = df_08[df_08['fuel'].str.contains('/')]
+
+# Create two copies of the hb_08 dataframe:
+df1 = hb_08.copy() # data on first fuel type of each hybrid vehicle
+df2 = hb_08.copy() # data on second fuel type of each hybrid vehicle
+
+# Now is the time to use python loop function along with apply and lambda function:
+# 1. Create a list of columns whose values need to be split by "/":
+split_columns = ['fuel', 'air_pollution_score', 'city_mpg', 'hwy_mpg', 'cmb_mpg', 'greenhouse_gas_score']
+
+# 2. apply split function to each column of each dataframe copy:
+for c in split_columns:
+    df1[c] = df1[c].apply(lambda x: x.split("/")[0])
+    df2[c] = df2[c].apply(lambda x: x.split("/")[1])
+
+# Now after successfully spliting and making 2 dataframes, we combine it together to make new_rows:
+new_rows = df1.append(df2)
+
+# Now we can ignore the original hybrid rows where 2 values are sticked together:
+df_08.drop(hb_08.index, inplace=True)
+
+# Add in our newly separated rows:
+df_08 = df_08.append(new_rows, ignore_index=True)
+
+# It is time to get back to the main part of converting string/object into int/float for this Series:
+df_08['air_pollution_score']=df_08['air_pollution_score'].astype(float)
+
+# Save it to a new file
+df_08.to_csv('data_08_v4.csv', index=False)
+                    </code></pre>
+
+
+                    <h3 class="section-heading">Distribution of greenhouse gas between 2008 and 2018</h3>	
+                    <p>By a simple query and plotting by histogram on pandas, we can compare the distributions of greenhouse gas score in 2008 and 2018. </p>
+                    <a href="#">	
+                        <img class="img-responsive" src="/img/greenhouse_gas_score.png" alt="">	
+                    </a>
+                    <span class="caption text-muted">In general, the Greenhouse Gas Score is more skewed to the left in 2018, meaning cars generally generate less greenhouse gas compared to 10 years ago.</span>	
+
+                    <h3 class="section-heading">Combined Miles/Gallon comparison</h3>	
+                    <p>Again, we can use pandas and matplotlib to plot a simple histogram that shows visual insights of this question</p>
+                    <a href="#">	
+                        <img class="img-responsive" src="/img/combined_miles_per_gallon.png" alt="">	
+                    </a>
+                    <span class="caption text-muted">The distribution of combined miles per gallon from 2008 to 2018 shows us that it became much more skewed to the right in the light of the introduction of electrical/hybrids vehicles.</span>		
+
+                    <h3 class="section-heading">Displacement and Combined Miles Per Gallon</h3>	
+                    <p>Looking further, I analyze the difference between the Displacement and Combined Miles Per Gallon using mathplotlib scatterplot.</p>
+                    <a href="#">	
+                        <img class="img-responsive" src="/img/displacement_combined_mpg.png" alt="">	
+                    </a>
+                    <span class="caption text-muted">There is a negative correlation between displacement and comboned mpg. This inversely proportional correlation occurred in both 2008 and 2018.</span>	
+
+
+                    <h3 class="section-heading">Colleration between Greenhouse Gas Score and Combined mpg in 2008 and 2018</h3>	
+                    <p>I wonder if there is any colleration between the greenhouse gas score and the combined mpg. A simple scatterplot should show the trend</p>
+                    <a href="#">	
+                        <img class="img-responsive" src="/img/greenhouse_gas_score_combined_mpg.png" alt="">	
+                    </a>
+                    <span class="caption text-muted">There is a positive correlation between greenhouse gas score and combined mpg. This direct relation occurred in both 2008 and 2018. </span>	
+
+                    <h3 class="section-heading">Improvements in Fuel Economy</h3>	
+                    <p>Last but not least, I would like to look at different vehical classes and see how they improved in average Miles per Gallon (MPG).</p>
+                    <a href="#">	
+                        <img class="img-responsive" src="/img/improvement_fuel_economy.png" alt="">	
+                    </a>
+                    <span class="caption text-muted">Over ten years, vehicle classes improved in fuel economy. It is demonstrated by the increase of combined miles per gallon each class performs in 2018. Due to the re-definition of car models and vehicle classes, some sorts of cars have no information.</span>
+
+                    <h3 class="section-heading">Conclusion</h3>	
+                    <p>These diagrams really help to show linear collerations between different sources. By applying simple histogram functions onto the data we can get a hold of what the data feels like.</p>
+                    <p>All the code is available at my <a href="https://github.com/quangineer/Fuel_Economy_Data">Github</a></p>
+
+
+                </div>	
+            </div>	
+        </div>	
+    </article>	
+
+     <hr>	
+
+     {% include 'footer.html' %}
