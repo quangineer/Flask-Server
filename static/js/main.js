@@ -13,10 +13,6 @@ $(document).ready(function() {
         success: function (response) {
             console.log(response.message)
             console.log($(".intro-header")[0].style.background = "url(" + response. message + ")")
-            // $(":header").attr('src',response.message);
-
-            // $(":header").css("style", "background-image: url(" + response. message + ")");
-
         },
         error: function (xhr, status) {
             console.log(xhr)
