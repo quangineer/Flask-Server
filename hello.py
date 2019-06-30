@@ -30,10 +30,11 @@ def send_img(path):
 @app.route('/contact.html')
 def contact():
     return render_template('contact.html')
+    
 # Blog post resources
 @app.route("/post/<postname>/")
 def post1(postname):
-    return render_template(postname)
+    return render_template("/blogposts/" + postname)
 
 # About page
 @app.route("/about.html")

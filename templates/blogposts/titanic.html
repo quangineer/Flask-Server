@@ -1,0 +1,139 @@
+{% include 'header.html' %}
+
+ <body>	
+
+
+     <!-- Page Header -->	
+    <!-- Set your background image for this header on the line below. -->	
+    <header class="intro-header" style="background-image: url('')">	
+        <div class="container">	
+            <div class="row">	
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                    <div class="post-heading">
+                        <h1>Analyze a Dataset of the Titanic</h1>	
+                        <h3 class="subheading">Analyzed a dataset containing information of passengers on the Titanic</h3>	
+                        <span class="meta">Posted by <a href="/">Quangineer</a> on June 29, 2019</span>	
+                    </div>	
+                </div>	
+            </div>	
+        </div>	
+    </header>	
+
+     <!-- Post Content -->	
+    <article>	
+        <div class="container">	
+            <div class="row">	
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                    <h3 class="section-heading">About the Dataset</h3>	
+                    <p>The Dataset can be found on <a href="https://www.kaggle.com/c/titanic">Kaggle</a>. It contains various information of the passengers, including the ticket class they bought, sex, ages, number of siblings on board, their passenger fares and more importantly whether they survived after the crash.</p>
+
+                    <p>I would like to analyze this dataset to see how different people survived/died in the crash and whether having any attribute would make them more or less likely to die. The code of this project is available <a href="https://github.com/quangineer/analyze_titanic_dataset">on my Github</a>.</p>
+
+                    <iframe src="https://giphy.com/embed/OJw4CDbtu0jde" width="480" height="202" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/titanic-movie-night-OJw4CDbtu0jde">via GIPHY</a></p>
+                    <h3 class="section-heading">The Process</h3>
+                    
+                    <p>First of all, we need to clean up the data a little bit. Some cells contaning null data need to be cleared out.</p>
+
+                    <pre><code>
+# There are 177 rows with Nal value in Age. So just fill it with Nal value
+df_train.fillna(df_train.mean(),inplace=True)
+# There are 2 rows with Nal value in Embarked. We drop them
+df_train.dropna(inplace=True)
+                    </code></pre>
+
+                    <h3>Association between Fare Rate and Survivalbility</h3>
+                    <p>Let's investigate the colleration between fare rate and survivalbility.</p>
+                    <pre><code>
+survived = df_train.Survived == True
+died = df_train.Survived == False
+# Divived the Survived column into 2 groups
+(df_train["Survived"][survived].count())   
+# print 340
+(df_train["Survived"][died].count())       
+# print 549
+(df_train.Fare[survived].mean())    
+# print 48.2094
+(df_train.Fare[died].mean())        
+# print 22.1178                        
+                    </code></pre>
+                    <p>It turns out that the mean fare ticket of the survive is more than double of the dead! This goes to show that buying a more expensive ticket can reduce your fatality on the Titanic! Let's visualize it.</p>
+
+
+
+                    <pre><code>
+df_train.Age[survived].hist(alpha=0.5, bins=20, label='survived')
+df_train.Age[died].hist(alpha=0.5, bins=20, label='died')                        
+                    </code></pre>
+                    <img class="img-responsive" src="/img/titanic_fare.png" alt="">	
+                    <span class="caption text-muted">Two histograms of the ticket prices and their frequencies. The one on the darker side represents the people who survived the crash. We can see that a lot of people who bought the lowest tickets died and people who bought more expensive tickets have a better chance of survival.</span>
+                    
+
+
+                    <h3>How does gender pay a role in Survival/Death?</h3>
+
+                    <p>We would like to look at how each sex affects survivalbility</p>
+
+                    <pre><code>
+df_train.groupby("Sex").Survived.mean()
+>>> Sex
+>>> female    0.740385
+>>> male      0.188908
+>>> Name: Survived, dtype: float64
+df_train.query('Sex=="female"')["Fare"].median()  
+>>> 23
+df_train.query('Sex=="male"')["Fare"].median()
+>>> 10.5
+                    </code></pre>
+                    <p>From above, we figured that a lot more females (74%) survived in the Titanic whereas only 18% of males survived</p>
+                    <pre><code>
+df_train.groupby(["Pclass","Sex"]).Survived.mean().plot(kind='bar')                        
+                    </code></pre>
+                    <img class="img-responsive" src="/img/titanic_gender.png" alt="">	
+                    <span class="caption text-muted">This bar graph shows the difference between male and female survival in three distinct classes on the Titanic. It is apparent that in every class, more percentage of females survived the Titanic than males.</span>
+
+
+                    <h3>Does having siblings on board play a role in the survivalbility on the Titanic?</h3>
+
+                    <pre><code>
+df_train["SibSp"][survived].value_counts()
+>>> 0    208
+>>> 1    112
+>>> 2     13
+>>> 3      4
+>>> 4      3
+>>> Name: SibSp, dtype: float64
+
+df_train["SibSp"][died].value_counts()
+>>> 0    398
+>>> 1     97
+>>> 4     15
+>>> 2     15
+>>> 3     12
+>>> 8      7
+>>> 5      5
+>>> Name: SibSp, dtype: int64
+                    </code></pre>
+                    <p>Looks like as the number of siblings goes up, survival rate and death rate both goes down. This does not give us too many insights so let's find a way to count the number of death/survial of each sibling categories to visualize them.</p>
+                    <pre><code>
+df_train["SibSp"][survived].value_counts().plot(kind="bar", alpha=0.5, color="darkred", label="survived")
+df_train["SibSp"][died].value_counts().plot(kind="bar", alpha=0.5, color="yellow", label="died")
+plt.show()                        
+                    </code></pre>
+
+                    <img class="img-responsive" src="/img/titanic_sibling.png" alt="">	
+                    <span class="caption text-muted">
+                        We can observe that if the person has 0 or more than 1 sibling on board, the chances of them surviving after the crash actually decreased.
+                    </span>
+
+                    <h3>Conclusion</h3>
+                    <p>By applying simple aggregation functionalities onto the dataset, we can get some insights into how different attributes of each passengers can increase or decrease their chances of survival. This is an incomplete project and in the future it is going to be populated with new findings!</p>
+
+
+                </div>	
+            </div>	
+        </div>	
+    </article>	
+
+     <hr>	
+
+     {% include 'footer.html' %}
