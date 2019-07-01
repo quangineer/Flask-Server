@@ -1,0 +1,166 @@
+{% include 'header.html' %}
+
+ <body>	
+
+
+     <!-- Page Header -->	
+    <!-- Set your background image for this header on the line below. -->	
+    <header class="intro-header" style="background-image: url('')">	
+        <div class="container">	
+            <div class="row">	
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                    <div class="post-heading">
+                        <h1>Analyzing a dataset of setting up businesses in the World</h1>	
+                        <h3 class="subheading">Looking a several datasets and combined them to show some insights into business costs around the world</h3>	
+                        <span class="meta">Posted by <a href="/">Quangineer</a> on June 30, 2019</span>	
+                    </div>	
+                </div>	
+            </div>	
+        </div>	
+    </header>	
+
+     <!-- Post Content -->	
+    <article>	
+        <div class="container">	
+            <div class="row">	
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                    <p>Given three private datasets as follow:</p>
+                    <ol>
+                        <li>Cost of business start up procedure (in % of Gross National Income per capita)</li>
+                        <li>Business extent disclosure (index)</li>
+                        <li>Ease of doing business (index: 1=most business friendly regulations)</li>
+                    </ol>                    
+                    <p>This project helps to understand how business environment works all over the World! Through this project, I learn about ways to combine different spreadsheets to unify our data.</p>
+
+                    <h3 class="section-heading">Data Wrangling Process</h3>
+                    
+                    <p>The first step of this project is to convert excel files to csv for easier processing. I did this by using an utility function in Pandas. After going through the dataset, I observed some missing dataset that needs to be cleared up in the cost of startup business and Business extent disclosure. The full code is available on my Github page.</p>
+
+                    <h3 class="section-heading">Plotting useful bar graphs</h3>                    
+
+                    <pre><code>
+#### Top ten countries finding it easiest to do businesses in 2017: (index=1 means the most friendly)
+Ease_most_friendly_2017 = df3.nsmallest(10,"2017")
+Ease_most_friendly_2017.plot(kind="bar",x="country",y="2017",label="index2017", alpha=0.4)
+plt.pyplot.legend(loc='upper right')
+plt.pyplot.title('Top ten countries finding it easiest to do businesses')
+
+##### Top ten countries finding it hardest to do businesses in 2017: (index=1 means the most friendly)
+Ease_least_friendly_2017 = df3.nlargest(10,"2017")
+Ease_least_friendly_2017.plot(kind="bar",x="country",y="2017",label="index2017", alpha=0.4)
+plt.pyplot.legend(loc='upper right')
+plt.pyplot.title('Top ten countries finding it hardest to do businesses')
+
+##### Top ten countries with minimum expense of setting up business in 2017:
+Cost_minimum_2017 = df1.nsmallest(10,"2017")
+Cost_minimum_2017.plot(kind="bar",x="country",y="2017",label="price = % over GNI per capita", alpha=0.4)
+plt.pyplot.legend(loc='upper right')
+plt.pyplot.title('Top ten countries with minimum expense of setting up business')
+
+##### Top ten countries with maximum expense of setting up business in 2017:
+Cost_maximum_2017 = df1.nlargest(10,"2017")
+Cost_maximum_2017.plot(kind="bar",x="country",y="2017",label="price = % over GNI per capita", alpha=0.4)
+plt.pyplot.legend(loc='upper right')
+plt.pyplot.title('Top ten countries with maximum expense of setting up business')
+plt.pyplot.show()                        
+                    </code></pre>
+
+                    <img class="img-responsive" src="/img/business_in_the_world_graph.png" alt="">	
+
+                    <h3 class="section-heading">Analysis Time</h3>
+
+                    <h3>1. Does having a low index of setting up cost business mean doing business be easier in 2017?</h3>
+
+                    <pre><code>
+##### List all countries that have minimum cost of set-up business AND in the list of easiest countries:
+List_A = []
+for i in Cost_minimum_2017.country:
+    if i in Ease_most_friendly_2017.country.tolist():
+        List_A.append(i)
+##### Get the values of cost of set-up business in each country in List_A:
+for i in List_A:
+    print (df1[df1.country == str(i)])
+##### List all countries that are in the list of easiest countries BUT do NOT have the minimum cost of set-up business:
+List_B = list(set(Ease_most_friendly_2017.country.tolist()) - set(List_A))
+##### Get the values of cost of set-up business in each country in List_B:
+for i in List_B:
+    print (df1[df1.country == str(i)])                        
+                    </code></pre>
+
+                    <p>Not really so. Only 4 out of 10 contries UK, NZ, Denmark and Macedonia in the top 10 easy-to-do-business list have a low index in cost of setting up businesses and they are 0.0%, 0.1%, 0.2% and 0.3% respectively.</p>
+
+
+
+                    <h3>2. Does having a low index of setting up cost business mean doing business be easier in 2017?</h3>
+                    <pre><code>
+#### List all countries that have maximum cost of set-up business AND in the list of hardest countries:
+List_C = []
+for i in Cost_maximum_2017.country:
+    if i in Ease_least_friendly_2017.country.tolist():
+        List_C.append(i)
+# print (List_C)
+##### Get the values of cost of set-up business in each country in List_C:
+for i in List_C:
+    print (df1[df1.country == str(i)])
+##### List all countries that are in the list of hardest countries BUT do Not appear in the maximum cost of set-up business:
+List_D = list(set(Ease_least_friendly_2017.country.tolist()) - set(List_C))
+##### Get the values of cost of set-up business in each country in List_D:
+for i in List_D:
+    print (df1[df1.country == str(i)])                        
+                    </code></pre>
+
+                    <p>We have Sweden (0.5%), Singapore (0.5%), Norway (0.9%), Georgia (2.5%), United States (1.1%), South Korea (14.6%). From this we deduced that setting up business in countries with most business friendly environments does not always guarantee that it will go with cheap price of setting up business processes.</p>
+
+                    <h3>3. Does higher index of cost in set-up business also mean a harder country to do business?</h3>
+                    <pre><code>
+##### Get the top ten of high disclosure countries in 2017:
+Disclosure_High_2017 = df2.nlargest(10,"2017")
+##### List all the countries that in the top ten of high disclosure AND also in the list of easiest countries
+List_E = []
+for i in Disclosure_High_2017.country:
+    if i in Ease_most_friendly_2017.country.tolist():
+        List_E.append(i)
+##### Get the value of each country disclosure index in list E:
+for i in List_E:
+    print (df2[df2.country == str(i)])
+                    </code></pre>
+
+                    <p>Half of top ten countries in the list of hardest to do business find its set-up cost index at the highest level. We can conclude that countries with weaker protections of property rights and less regulations to support businesses will be partially associated with high index of set-up procedure cost. Below are the top 5 countries that have a very high index of set-up procedure cost:</p>
+
+                    <ol>
+                        <li>Venezuela: 352%</li>
+                        <li>South Sudan: 305%</li>
+                        <li>Somalia: 204%</li>
+                        <li>Haiti: 200%</li>
+                        <li>Central African Republic: 155%</li>
+                    </ol>                        
+                    <p>The limit of this comparison is that the index only reflects the percentage of the cost over the General National Income. The value of currency varies by the country and it makes it impossible to compare directly amongst countries.</p>
+
+
+
+                    <h3>4. Does countries with high disclosure index mean a high ranking in the easiness level to do business?</h3>
+                    <pre><code>
+##### Get the top ten of low disclosure countries in 2017:
+Disclosure_Low_2017 = df2.nsmallest(10,"2017")
+##### List all the countries that in the bottom of disclosure index table AND also in the list of hardest countries:
+List_F = []
+    for i in Disclosure_Low_2017:
+        if i in Ease_least_friendly_2017.country.tolist():
+            List_F.append(i)
+print (List_F)
+##### List_F return an empty list.
+                    </code></pre>
+                    <p>There is not much related correlation between countries with high or low disclosure index and the level of ease of doing business. More specifically, there are only three countries in the list of easiest countries to do business that appear in the top ten countries with highest disclosure index, namely Macedonia,FYR: 10, New Zealand: 10 and Singapore: 10. More importantly, countries that are considered hardest to do business in yet do not show up in the list of countries with lowest disclosure index. It means that at a certain level these countries where people find it hard to do business in term of regulations.</p>
+
+
+                    <h3 class="section-heading" >Conclusion</h3>
+
+                    <p>These simple graphs and analysis really show some interesting findings regarding this dataset of business startup cost and set-up cost!</p>
+                </div>	
+            </div>	
+        </div>	
+    </article>	
+
+     <hr>	
+
+     {% include 'footer.html' %}
