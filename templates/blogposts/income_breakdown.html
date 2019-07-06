@@ -1,0 +1,222 @@
+{% include 'header.html' %}
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+/* Chart */
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* width: 960px; */
+  /* height: 500px; */
+  position: relative;
+}
+
+svg {
+	width: 100%;
+	height: 100%;
+}
+
+path.slice{
+	stroke-width:2px;
+}
+
+polyline{
+	opacity: .3;
+	stroke: black;
+	stroke-width: 2px;
+	fill: none;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - when the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .col-25, .col-75, input[type=submit] {
+    width: 100%;
+    margin-top: 0;
+  }
+} */
+
+</style>
+
+<body>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>    
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+  <!-- Page Header -->	
+  <!-- Set your background image for this header on the line below. -->	
+  <header class="intro-header" style="background-image: url('')">	
+      <div class="container">	
+          <div class="row">	
+              <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                  <div class="post-heading">
+                      <h1>Income breakdown visualization</h1>	
+                      <h3 class="subheading">Visualize monthly income and expense in a clear pie chart</h3>	
+                      <span class="meta">Posted by <a href="/">Quangineer</a> on July 6, 2019</span>	
+                  </div>	
+              </div>	
+          </div>	
+      </div>	
+  </header>	  
+  <article>	
+    <div class="container">	
+        <div class="row">	
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+            <h3>The Idea</h3>
+            <p>To be able to visualize how much we spend for different expenses every month, I utilize Plotly library to make a simple pie chart that can help us have a clearer picture of our spending habit.</p>
+            <h3>A Sample</h3>
+            <img class="img-responsive" src="/img/income_breakdown_expense.png" alt="">	
+            <span class="caption text-muted">A sample of income/expense breakdown</span>
+
+            <h3>Try it out!</h3>
+            <form id="input-form">
+                <div class="form-group">
+                    <label for="monthly-income">Monthly Income:</label>
+                    <input type="number" name="total" class="form-control" step="0.01" placeholder="Enter Monthly Income" min="1">
+                </div>
+                <label for="monthly-income">Monthly Expenses:</label>
+                <div class="form-group form-inline">
+                    <label for="monthly-income">Enter a name:</label>
+                    <input type="text" class="form-control" name="expense-name" placeholder="food, rent, bills , etc.">
+                    <label for="monthly-income">Enter an amount:</label>
+                    <input type="number" class="form-control" name="expense-amount" step="0.01" placeholder="10000">
+                </div>
+                <div class="form-group form-inline">
+                    <label for="monthly-income">Enter a name:</label>
+                    <input type="text" class="form-control" name="expense-name" placeholder="food, rent, bills , etc.">
+                    <label for="monthly-income">Enter an amount:</label>
+                    <input type="number" class="form-control" name="expense-amount" step="0.01" placeholder="10000">
+                    <button name="a" class="btn btn-default">Remove</button>
+                </div>    
+            </form>
+            <div class="form-group form-inline">
+                    <button class="btn btn-default" id="add-expense">Add An Expense</button>
+                    <button id="submit" class="btn btn-default">Visualize It</button>
+            </div> 
+            <div id="myChart"></div>
+
+            <h3>This project is written using HTML, CSS, Javascript with Bootstrap, JQuery and Plotly.js</h3>
+
+        </div>
+      </div>
+    </div>
+  </article>
+
+
+</body>
+
+<!-- <footer> -->
+    <script>
+        function Drawchart(values, labels, totalIncome, expenseExeededIncome){
+            var data = [{
+                values: values,
+                labels: labels,
+                domain: {column: 0},
+                // name: 'Expense',
+                hoverinfo: 'label+percent',
+                textinfo: 'value',
+                hole: .5,
+                type: 'pie'
+            }];
+            
+            var layout = {
+                title: 'Breakdown of expense/income per month',
+                annotations: [
+                {
+                    font: {
+                        size: 16
+                    },
+                    showarrow: false,
+                    text: 'Monthly Income: ' + totalIncome.toString(),
+                    x: 0.5,
+                    y: 0.5
+                }
+                ],
+                height: 600,
+                width: 600,
+                showlegend: true,
+                grid: {rows: 1, columns: 1}
+            };
+
+            if (expenseExeededIncome){
+                layout["annotations"].push({                    
+                    font: {
+                        size: 16
+                    },
+                    showarrow: false,
+                    text: 'Expenses Exceed Monthly Income',
+                    x: 0.5,
+                    y: 0
+                });
+            }
+            
+            Plotly.newPlot('myChart', data, layout);
+        }
+
+
+        $("#add-expense" ).click(function(e) {
+            e.preventDefault();
+            input = jQuery(
+                ' <div class="form-group form-inline"> <label for="monthly-income">Enter a name:</label> <input type="text" class="form-control" name="expense-name" placeholder="food, rent, bills , etc."> <label for="monthly-income">Enter an amount:</label> <input type="number" class="form-control" name="expense-amount" step="0.01" placeholder="10000"> <button name="a" class="btn btn-default">Remove</button> </div> '
+            );
+            $("#input-form").append(input);
+
+            $('[name=a]').click(function(e) { 
+                e.preventDefault();
+                $(this).parent('div').remove();
+            });            
+        });
+
+
+        $("#submit" ).click(function(e) {
+            e.preventDefault();
+            var inputForm = $("#input-form");
+            var totalIncome = 0;
+            var values = [];
+            var lables = [];
+            console.log(inputForm);
+            for(i = 0; i < inputForm[0].length; i++){
+                var element = inputForm[0][i];
+                console.log(element.value);
+                if (element.value == "") continue;
+                if ($(element).attr('name') == "total" ){
+                    totalIncome = parseFloat(element.value);
+                } else if ($(element).attr('name') == "expense-amount" ){
+                    values.push(parseFloat(element.value));
+                } else if ($(element).attr('name') == "expense-name" ){
+                    lables.push(element.value);
+                }
+            }
+            console.log("values", values);
+            
+            console.log(totalIncome, values.reduce((a, b) => a + b, 0));
+            // Calculate savings
+            var savings = Math.max(0, totalIncome - values.reduce((a, b) => a + b, 0));
+            console.log(savings);
+            values.push(savings);
+            lables.push("You saved");
+            Drawchart(values, lables, totalIncome, savings == 0);
+
+        });
+
+        // Remove an entry
+        $('[name=a]').click(function(e) { 
+            e.preventDefault();
+            $(this).parent('div').remove();
+        });     
+
+    </script>
+<!-- </footer> -->
+
+
+{% include 'footer.html' %}
