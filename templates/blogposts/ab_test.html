@@ -1,0 +1,141 @@
+{% include 'header.html' %}
+
+ <body>	
+
+
+    <!-- Page Header -->	
+    <!-- Set your background image for this header on the line below. -->	
+    <header class="intro-header" style="background-image: url('')">	
+        <div class="container">	
+            <div class="row">	
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                    <div class="post-heading">
+                        <h1>Analyze A-B Test Results</h1>	
+                        <h3 class="subheading">Analyze A/B tests run by an e-commerce website</h3>	
+                        <span class="meta">Posted by <a href="/">Quangineer</a> on July 21, 2019</span>	
+                    </div>	
+                </div>	
+            </div>	
+        </div>	
+    </header>	
+
+     <!-- Post Content -->	
+    <article>	
+        <div class="container">	
+            <div class="row">	
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">	
+                    <h3 class="section-heading">Introduction</h3>                    
+                    <p>This project is dedicated to Udacity. It is conducted to understand the results of an A/B test run by an e-commerce website. The ultimate goal is to work through this notebook to help the company understand if they should implement this new page, keep the old page, or perhaps run the experiment longer to make their decision.</p>
+
+                    <h3 class="section-heading">Understand the Data</h3>
+                    
+                    <p>First we open the data and try to have a grasp of it</p>
+
+                    <pre><code>
+import pandas as pd 
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+% matplotlib inline
+random.seed(42)     
+
+df = pd.read_csv("ab_data.csv")
+df.head()               
+                    </code></pre>
+
+                    <img class="img-responsive" src="/img/ab_test_head_data.png" alt="">	
+     
+                    <p>Let's see how much data we are dealing with</p>
+
+                    <pre><code>
+df.info()
+>>> RangeIndex: 294478 entries, 0 to 294477
+>>> Data columns (total 5 columns):
+>>> user_id         294478 non-null int64
+>>> timestamp       294478 non-null object
+>>> group           294478 non-null object
+>>> landing_page    294478 non-null object
+>>> converted       294478 non-null int64
+>>> dtypes: int64(2), object(3)
+>>> memory usage: 11.2+ MB
+
+df.user_id.nunique()
+>>> 290584
+
+df.converted.mean()
+>>> 0.11965919355605512
+                    </code></pre>                    
+
+                    <h3 class="section-heading">Analysis Time</h3>
+
+                    <pre><code>
+df2[df2.group=='control'].converted.mean()     
+>>> 0.1203863045004612
+
+df2[df2.group=='treatment'].converted.mean()
+>>> 0.11880806551510564
+                    </code></pre>                    
+                    
+                    <p> So in this dataset, the control group has a higher converted rate than the treatment group's converted rate. The converted rate difference between control group and treatment group is 0.15% (observed difference). So there is NO SUFFICIENT EVIDENCE that the new treatment page leads to more conversions.</p>
+
+                    <p> Next, The null and alternative hypotheses will be:
+                        H0 (Null hypotheses): Pnew <= Pold
+                        H1 (Alternative hypotheses): Pnew > Pold
+                        In which Pnew means the probability of converted rates for the new page and Pold means the probability of converted rates for the old page</p>
+
+<pre><code>
+# Assume under the null hypothesis, Pnew and Pold are both equal to the converted success rate regardless of page. 
+# Furthermore, assume they are equal to the converted rate in ab_data.csv regardless of page. 
+
+p_new  = df2.converted.mean()
+p_old  = df2.converted.mean()
+
+print(p_new, p_old)    
+
+>>> 0.11959708724499628 0.11959708724499628
+</code></pre>                        
+
+                    <p>We simulate n_new transaction with a conversion rate of p_new under the NULL. Store these n_new 1's and 0's in new_page_converted. We do the same thing for p_old under the NULL. </p>
+
+<pre><code>
+new_page_converted = np.random.choice([1,0], size=n_new, p=[p_new,(1-p_new)])
+old_page_converted = np.random.choice([1,0], size=n_old, p=[p_old,(1-p_old)])
+# Find Pnew - Pold = diff:
+diff = new_page_converted.mean() - old_page_converted.mean()
+print(diff)
+>>> 0.0007549226647144275
+
+
+# Create 10,000 Pnew - Pold values using the same simulation process above. 
+# Store values in a Numpy array called p_diffs.
+p_diffs=[]
+for i in range(10000):
+    new_page_converted = np.random.choice([1,0], size=n_new, p=[p_new,(1-p_new)]).mean()
+    old_page_converted = np.random.choice([1,0], size=n_old, p=[p_old,(1-p_old)]).mean()
+    diff= new_page_converted - old_page_converted
+    p_diffs.append(diff)
+
+# Remember the observed difference mentioned above? We should include this in the following plot so that we know 
+# more about where it is in the plot and from that to decide anything else. 
+# First, calculate that observed difference and store it in observed_difference:
+
+observed_difference = df2[df2.group=='treatment'].converted.mean() - df2[df2.group=='control'].converted.mean()    
+</code></pre>
+
+                <img class="img-responsive" src="/img/ab_test_graph.png" alt="">	
+                <span class="caption text-muted">a plotting of 10,000 simulations of P_diffs </span>	
+
+                <p>To this step, we are running the test under the NULL hypotheses which is the old webpage has better or equal to the conversion rate than the new webpage's conversion rate. The P-value (88.99%) is far higher than the typical alpha of 5% in standard business studies (Remember only reject the null when null P-value equals or less than 0.05). A high percentage of P-value means that there is NO statistical evidence to reject the null hypotheses. The Null hypotheses is TRUE: Pold >= Pnew</p>
+
+
+                <h3 class="section-heading">Conclusion</h3>	
+                <p>Based on this, We can conclude that we should keep the old page and not run the new page.</p>
+                <p>This is only one of a few analysis I have done with this dataset. My whole project can be found <a href="https://github.com/quangineer/Analyze-A-B-Test-Results">Here</a>.</p>
+                </div>	
+            </div>	
+        </div>	
+    </article>	
+
+     <hr>	
+
+    {% include 'footer.html' %}
